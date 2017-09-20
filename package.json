@@ -1,0 +1,18 @@
+{
+  "name": "reading-log",
+  "version": "1.0.0",
+  "repository": "git@github.com:ahstro/reading-log.git",
+  "author": "Anton Strömkvist <hi@ahst.ro>",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "chokidar-cli": "^1.2.0",
+    "elm": "^0.18.0",
+    "uglify-js": "^3.1.0"
+  },
+  "scripts": {
+    "build:dev": "elm make app/Main.elm --output build/app.js ; exit 0",
+    "build:prod": "yarn build:dev && uglifyjs --mangle --compress --output build/app.js -- build/app.js",
+    "watch": "chokidar 'app/**/*.elm' -c 'yarn build:dev'"
+  }
+}

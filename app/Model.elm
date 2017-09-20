@@ -5,6 +5,8 @@ module Model
         , Book
         )
 
+import EveryDict exposing (EveryDict)
+
 
 type ISBN
     = ISBN Int
@@ -24,6 +26,7 @@ type alias Book =
 
 type alias Model =
     { books : List Book
+    , progress : EveryDict ISBN Page
     }
 
 
@@ -36,8 +39,9 @@ init =
                 ( Page 8
                 , Page 205
                 )
-            , ISBN 9789173894944
+                (ISBN 9789173894944)
             ]
+      , progress = EveryDict.singleton (ISBN 9789173894944) (Page 13)
       }
     , Cmd.none
     )

@@ -11,9 +11,14 @@ html {
 
 .book {
   width: 12rem;
+  height: 16rem;
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.book > * {
+  flex-shrink: 0;
 }
 
 .progressBar {
@@ -47,4 +52,10 @@ html {
 
 .milestone {
   border-left: 1px solid;
+}
+
+.bookCover {
+  object-fit: contain;
+  flex-grow: 1;
+  flex-shrink: 1;
 }

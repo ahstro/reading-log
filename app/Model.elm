@@ -3,7 +3,7 @@ module Model
         ( Model
         , init
         , Book
-        , ISBN
+        , ISBN(..)
         , Page(..)
         )
 

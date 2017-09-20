@@ -1,10 +1,11 @@
 module View exposing (view)
 
-import Html exposing (Html, div, text)
-import Html.Attributes exposing (class, style)
+import Html exposing (Html, div, text, img)
+import Html.Attributes exposing (class, style, src)
 import Model exposing (Model, ISBN, Book, Page(..))
 import Update exposing (Msg(..))
 import Helpers.Page as Page
+import Helpers.ISBN as ISBN
 import EveryDict
 
 
@@ -20,9 +21,14 @@ view model =
 
 
 viewBook : Model -> ( ISBN, Book ) -> Html Msg
-viewBook model ( _, book ) =
+viewBook model ( isbn, book ) =
     div [ class "book" ]
-        [ div [] [ text book.name ]
+        [ img
+            [ src <| getCover isbn
+            , class "bookCover"
+            ]
+            []
+        , div [] [ text book.name ]
         , div [] [ text book.author ]
         , progressBar book model
         ]
@@ -82,3 +88,14 @@ milestones daysToRead =
 
         Nothing ->
             text ""
+
+
+getCover : ISBN -> String
+getCover isbn =
+    let
+        isbnString =
+            isbn
+                |> ISBN.get
+                |> toString
+    in
+        "https://covers.openlibrary.org/b/isbn/" ++ isbnString ++ "-M.jpg"

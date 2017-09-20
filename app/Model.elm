@@ -29,6 +29,7 @@ type alias Book =
 type alias Model =
     { books : EveryDict ISBN Book
     , progress : EveryDict ISBN Page
+    , daysToRead : EveryDict ISBN Int
     }
 
 
@@ -45,6 +46,7 @@ init =
         )
         { books = EveryDict.empty
         , progress = EveryDict.empty
+        , daysToRead = EveryDict.empty
         }
       )
         |> (\model ->
@@ -54,6 +56,11 @@ init =
                             (ISBN 9789173894944)
                             (Page 21)
                             model.progress
+                    , daysToRead =
+                        EveryDict.insert
+                            (ISBN 9789173894944)
+                            30
+                            model.daysToRead
                 }
            )
     , Cmd.none

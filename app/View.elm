@@ -53,6 +53,10 @@ progressBar book model =
                 |> ceiling
                 |> toString
                 |> (flip (++)) "%"
+
+        daysToRead =
+            model.daysToRead
+                |> EveryDict.get book.isbn
     in
         div [ class "progressBar" ]
             [ div
@@ -63,4 +67,18 @@ progressBar book model =
                 ]
                 []
             , div [ class "percent" ] [ text percent ]
+            , milestones daysToRead
             ]
+
+
+milestones : Maybe Int -> Html Msg
+milestones daysToRead =
+    case daysToRead of
+        Just days ->
+            div [ class "milestones" ]
+                (List.repeat days <|
+                    div [ class "milestone" ] []
+                )
+
+        Nothing ->
+            text ""

@@ -3,6 +3,8 @@ module Model
         ( Model
         , init
         , Book
+        , ISBN
+        , Page(..)
         )
 
 import EveryDict exposing (EveryDict)
@@ -32,7 +34,7 @@ type alias Model =
 
 init : ( Model, Cmd msg )
 init =
-    ( addBook
+    ( (addBook
         (Book
             "Regnet luktar inte här"
             "Duraid Al-Khamisi"
@@ -44,6 +46,16 @@ init =
         { books = EveryDict.empty
         , progress = EveryDict.empty
         }
+      )
+        |> (\model ->
+                { model
+                    | progress =
+                        EveryDict.insert
+                            (ISBN 9789173894944)
+                            (Page 21)
+                            model.progress
+                }
+           )
     , Cmd.none
     )
 

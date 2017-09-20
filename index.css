@@ -15,3 +15,22 @@ html {
   flex-direction: column;
   align-items: center;
 }
+
+.progressBar {
+  height: 1rem;
+  width: 100%;
+  background-color: #fafafa;
+  border: 1px solid;
+  border-radius: .1rem;
+  display: flex;
+  position: relative;
+}
+
+.progress {
+  background-color: #90da84;
+}
+
+.percent {
+  position: absolute;
+  right: 0;
+}

@@ -6,10 +6,14 @@ module Model
         )
 
 
+type Page
+    = Page Int
+
+
 type alias Book =
     { name : String
     , author : String
-    , pageCount : ( Int, Int )
+    , pageCount : ( Page, Page )
     }
 
 
@@ -21,7 +25,12 @@ type alias Model =
 init : ( Model, Cmd msg )
 init =
     ( { books =
-            [ Book "Regnet Luktar Inte Här" "Duraid Al-Khamisi" ( 8, 205 )
+            [ Book
+                "Regnet luktar inte här"
+                "Duraid Al-Khamisi"
+                ( Page 8
+                , Page 205
+                )
             ]
       }
     , Cmd.none

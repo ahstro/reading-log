@@ -25,23 +25,40 @@ type alias Book =
 
 
 type alias Model =
-    { books : List Book
+    { books : EveryDict ISBN Book
     , progress : EveryDict ISBN Page
     }
 
 
 init : ( Model, Cmd msg )
 init =
-    ( { books =
-            [ Book
-                "Regnet luktar inte här"
-                "Duraid Al-Khamisi"
-                ( Page 8
-                , Page 205
-                )
-                (ISBN 9789173894944)
-            ]
-      , progress = EveryDict.singleton (ISBN 9789173894944) (Page 13)
-      }
+    ( addBook
+        (Book
+            "Regnet luktar inte här"
+            "Duraid Al-Khamisi"
+            ( Page 8
+            , Page 205
+            )
+            (ISBN 9789173894944)
+        )
+        { books = EveryDict.empty
+        , progress = EveryDict.empty
+        }
     , Cmd.none
     )
+
+
+addBook : Book -> Model -> Model
+addBook book model =
+    { model
+        | books =
+            EveryDict.insert
+                book.isbn
+                book
+                model.books
+        , progress =
+            EveryDict.insert
+                book.isbn
+                (Tuple.first book.pageCount)
+                model.progress
+    }

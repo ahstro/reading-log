@@ -9,13 +9,17 @@ import Update exposing (Msg(..))
 view : Model -> Html Msg
 view model =
     div []
-        [ div [ class "books" ] <|
-            List.map
-                (\book ->
-                    div [ class "book" ]
-                        [ div [] [ text book.name ]
-                        , div [] [ text book.author ]
-                        ]
-                )
-                model.books
+        [ div [ class "books" ]
+            (model.books
+                |> EveryDict.toList
+                |> List.map (viewBook model)
+            )
+        ]
+
+
+viewBook : Model -> Book -> Html Msg
+viewBook model book =
+    div [ class "book" ]
+        [ div [] [ text book.name ]
+        , div [] [ text book.author ]
         ]

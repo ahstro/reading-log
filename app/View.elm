@@ -1,7 +1,17 @@
 module View exposing (view)
 
-import Html exposing (Html, div, text, img)
-import Html.Attributes exposing (class, style, src)
+import Html exposing (Html, div, text, img, input, form, label, span, button)
+import Html.Attributes
+    exposing
+        ( class
+        , style
+        , src
+        , type_
+        , name
+        , placeholder
+        , defaultValue
+        )
+import Html.Events exposing (onInput, onSubmit)
 import Model exposing (Model, ISBN, Book, Page(..))
 import Update exposing (Msg(..))
 import Helpers.Page as Page
@@ -17,6 +27,53 @@ view model =
                 |> EveryDict.toList
                 |> List.map (viewBook model)
             )
+        , addBookForm
+        ]
+
+
+addBookForm : Html Msg
+addBookForm =
+    form [ class "addBook", onSubmit AddBook ]
+        [ addBookField "ISBN: " "number" "isbn" "9780963009609" SetAddFormISBN
+        , addBookField "Name: " "text" "name" "PiHKAL: A Chemical Love Story" SetAddFormName
+        , addBookField "By: " "text" "by" "Ann & Sasha Shulgin" SetAddFormBy
+        , label
+            [ class "addFormField" ]
+            [ span [ class "addFormLabel addFormText" ] [ text "Pages: " ]
+            , input
+                [ type_ "number"
+                , name "progress"
+                , onInput SetAddFormProgress
+                , defaultValue "0"
+                , class "addFormInput"
+                ]
+                []
+            , span [ class "addFormText" ] [ text "/" ]
+            , input
+                [ type_ "number"
+                , name "pageCount"
+                , placeholder "978"
+                , onInput SetAddFormPageCount
+                , class "addFormInput"
+                ]
+                []
+            ]
+        , button [ type_ "submit" ] [ text "Add book" ]
+        ]
+
+
+addBookField : String -> String -> String -> String -> (String -> Msg) -> Html Msg
+addBookField label_ type__ name_ placeholder_ onInput_ =
+    label [ class "addFormField" ]
+        [ span [ class "addFormLabel addFormText" ] [ text label_ ]
+        , input
+            [ type_ type__
+            , name name_
+            , placeholder placeholder_
+            , onInput onInput_
+            , class "addFormInput"
+            ]
+            []
         ]
 
 
@@ -29,7 +86,7 @@ viewBook model ( isbn, book ) =
             ]
             []
         , div [] [ text book.name ]
-        , div [] [ text book.author ]
+        , div [] [ text book.by ]
         , progressBar book model
         ]
 

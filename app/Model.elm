@@ -5,6 +5,7 @@ module Model
         , Book
         , ISBN(..)
         , Page(..)
+        , addBook
         )
 
 import EveryDict exposing (EveryDict)
@@ -20,7 +21,7 @@ type Page
 
 type alias Book =
     { name : String
-    , author : String
+    , by : String
     , pageCount : Page
     , isbn : ISBN
     }
@@ -30,6 +31,12 @@ type alias Model =
     { books : EveryDict ISBN Book
     , progress : EveryDict ISBN Page
     , daysToRead : EveryDict ISBN Int
+    , showError : Bool
+    , addFormBy : String
+    , addFormISBN : String
+    , addFormName : String
+    , addFormProgress : String
+    , addFormPageCount : String
     }
 
 
@@ -40,23 +47,25 @@ init =
             "Regnet luktar inte här"
             "Duraid Al-Khamisi"
             (Page 205)
-            (ISBN 9789173894944)
+            (ISBN 9789173895606)
         )
+        26
         { books = EveryDict.empty
         , progress = EveryDict.empty
         , daysToRead = EveryDict.empty
+        , showError = False
+        , addFormBy = ""
+        , addFormISBN = ""
+        , addFormName = ""
+        , addFormProgress = "0"
+        , addFormPageCount = ""
         }
       )
         |> (\model ->
                 { model
-                    | progress =
+                    | daysToRead =
                         EveryDict.insert
-                            (ISBN 9789173894944)
-                            (Page 21)
-                            model.progress
-                    , daysToRead =
-                        EveryDict.insert
-                            (ISBN 9789173894944)
+                            (ISBN 9789173895606)
                             30
                             model.daysToRead
                 }
@@ -65,8 +74,8 @@ init =
     )
 
 
-addBook : Book -> Model -> Model
-addBook book model =
+addBook : Book -> Int -> Model -> Model
+addBook book progress model =
     { model
         | books =
             EveryDict.insert
@@ -76,6 +85,6 @@ addBook book model =
         , progress =
             EveryDict.insert
                 book.isbn
-                (Page 0)
+                (Page progress)
                 model.progress
     }

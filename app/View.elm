@@ -37,22 +37,15 @@ viewBook model ( isbn, book ) =
 progressBar : Book -> Model -> Html Msg
 progressBar book model =
     let
-        ( start, end ) =
-            book.pageCount
-
         current =
             model.progress
                 |> EveryDict.get book.isbn
                 |> Maybe.withDefault (Page 0)
-                |> (flip Page.sub) start
-                |> Page.get
-
-        totalPages =
-            Page.sub end start
                 |> Page.get
 
         percent =
-            totalPages
+            book.pageCount
+                |> Page.get
                 |> toFloat
                 |> (/) (toFloat current)
                 |> (*) 100

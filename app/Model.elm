@@ -21,7 +21,7 @@ type Page
 type alias Book =
     { name : String
     , author : String
-    , pageCount : ( Page, Page )
+    , pageCount : Page
     , isbn : ISBN
     }
 
@@ -39,9 +39,7 @@ init =
         (Book
             "Regnet luktar inte här"
             "Duraid Al-Khamisi"
-            ( Page 8
-            , Page 205
-            )
+            (Page 205)
             (ISBN 9789173894944)
         )
         { books = EveryDict.empty
@@ -78,6 +76,6 @@ addBook book model =
         , progress =
             EveryDict.insert
                 book.isbn
-                (Tuple.first book.pageCount)
+                (Page 0)
                 model.progress
     }

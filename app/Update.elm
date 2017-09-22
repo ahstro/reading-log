@@ -12,26 +12,21 @@ import Model
         , Page(..)
         , addBook
         )
+import Http
+import RemoteData exposing (WebData)
+import Json.Decode as Decode
 
 
 type Msg
     = NoOp
-    | SetAddFormBy String
     | SetAddFormISBN String
-    | SetAddFormName String
-    | SetAddFormProgress String
-    | SetAddFormPageCount String
-    | AddBook
+    | FetchBook
+    | HandleBookFetch (WebData Book)
 
 
 updateModel : Model -> ( Model, Cmd Msg )
 updateModel =
     (flip (!)) []
-
-
-hideError : Model -> ( Model, Cmd Msg )
-hideError model =
-    updateModel { model | showError = False }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -40,59 +35,54 @@ update msg model =
         NoOp ->
             updateModel model
 
-        SetAddFormBy by ->
-            hideError { model | addFormBy = by }
-
         SetAddFormISBN isbn ->
-            hideError { model | addFormISBN = isbn }
+            updateModel { model | isbnToAdd = isbn }
 
-        SetAddFormName name ->
-            hideError { model | addFormName = name }
-
-        SetAddFormProgress progress ->
-            hideError { model | addFormProgress = progress }
-
-        SetAddFormPageCount pageCount ->
-            hideError { model | addFormPageCount = pageCount }
-
-        AddBook ->
+        FetchBook ->
             let
-                isbnRes =
-                    model.addFormISBN
-                        |> String.toInt
-
-                progress =
-                    model.addFormProgress
-                        |> String.toInt
-                        |> Result.withDefault 0
-
-                pageCount =
-                    model.addFormPageCount
-                        |> String.toInt
-                        |> Result.withDefault 0
+                -- isbnToAdd should always be a valid ISBN string here because
+                -- it is enforced by the form input pattern attribute so we're
+                -- just using it directly instead of en- and decoding first
+                apiPath =
+                    "https://openlibrary.org/api/books"
+                        ++ "?bibkeys=ISBN:"
+                        ++ model.isbnToAdd
+                        ++ "&format=json"
+                        ++ "&jscmd=data"
             in
-                case isbnRes of
-                    Ok isbn ->
-                        let
-                            modelWithBook =
-                                addBook
-                                    (Book
-                                        model.addFormName
-                                        model.addFormBy
-                                        (Page pageCount)
-                                        (ISBN isbn)
-                                    )
-                                    progress
-                                    model
-                        in
-                            updateModel
-                                { modelWithBook
-                                    | addFormBy = ""
-                                    , addFormISBN = ""
-                                    , addFormName = ""
-                                    , addFormProgress = ""
-                                    , addFormPageCount = ""
-                                }
+                ( { model | bookToAdd = RemoteData.Loading }
+                , Http.get apiPath (decodeBook model.isbnToAdd)
+                    |> RemoteData.sendRequest
+                    |> Cmd.map HandleBookFetch
+                )
 
-                    Err _ ->
-                        updateModel { model | showError = True }
+        HandleBookFetch res ->
+            updateModel { model | bookToAdd = res }
+
+
+decodeBook : String -> Decode.Decoder Book
+decodeBook isbnString =
+    (Decode.field ("ISBN:" ++ isbnString)
+        (Decode.map4 Book
+            (Decode.field "title" Decode.string)
+            (Decode.field "by_statement" Decode.string)
+            (Decode.field "number_of_pages" pageDecoder)
+            (decodeISBN isbnString)
+        )
+    )
+
+
+pageDecoder : Decode.Decoder Page
+pageDecoder =
+    Decode.int
+        |> Decode.andThen (Decode.succeed << Page)
+
+
+decodeISBN : String -> Decode.Decoder ISBN
+decodeISBN isbnString =
+    case String.toInt isbnString of
+        Ok isbn ->
+            Decode.succeed (ISBN isbn)
+
+        Err err ->
+            Decode.fail err

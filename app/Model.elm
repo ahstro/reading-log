@@ -9,6 +9,7 @@ module Model
         )
 
 import EveryDict exposing (EveryDict)
+import RemoteData exposing (WebData)
 
 
 type ISBN
@@ -31,12 +32,8 @@ type alias Model =
     { books : EveryDict ISBN Book
     , progress : EveryDict ISBN Page
     , daysToRead : EveryDict ISBN Int
-    , showError : Bool
-    , addFormBy : String
-    , addFormISBN : String
-    , addFormName : String
-    , addFormProgress : String
-    , addFormPageCount : String
+    , bookToAdd : WebData Book
+    , isbnToAdd : String
     }
 
 
@@ -53,12 +50,8 @@ init =
         { books = EveryDict.empty
         , progress = EveryDict.empty
         , daysToRead = EveryDict.empty
-        , showError = False
-        , addFormBy = ""
-        , addFormISBN = ""
-        , addFormName = ""
-        , addFormProgress = "0"
-        , addFormPageCount = ""
+        , bookToAdd = RemoteData.NotAsked
+        , isbnToAdd = ""
         }
       )
         |> (\model ->

@@ -8,12 +8,16 @@ import Html.Attributes
         , src
         , type_
         , name
+        , pattern
+        , disabled
+        , required
         , placeholder
         , defaultValue
         )
 import Html.Events exposing (onInput, onSubmit)
 import Model exposing (Model, ISBN, Book, Page(..))
 import Update exposing (Msg(..))
+import RemoteData
 import Helpers.Page as Page
 import Helpers.ISBN as ISBN
 import EveryDict
@@ -27,48 +31,50 @@ view model =
                 |> EveryDict.toList
                 |> List.map (viewBook model)
             )
-        , addBookForm
+        , addBookForm model
         ]
 
 
-addBookForm : Html Msg
-addBookForm =
-    form [ class "addBook", onSubmit AddBook ]
-        [ addBookField "ISBN: " "number" "isbn" "9780963009609" SetAddFormISBN
-        , addBookField "Name: " "text" "name" "PiHKAL: A Chemical Love Story" SetAddFormName
-        , addBookField "By: " "text" "by" "Ann & Sasha Shulgin" SetAddFormBy
-        , label
-            [ class "addFormField" ]
-            [ span [ class "addFormLabel addFormText" ] [ text "Pages: " ]
-            , input
-                [ type_ "number"
-                , name "progress"
-                , onInput SetAddFormProgress
-                , defaultValue "0"
-                , class "addFormInput"
+addBookForm : Model -> Html Msg
+addBookForm model =
+    let
+        ( buttonText, submitIsDisabled, onSubmit_ ) =
+            case model.bookToAdd of
+                RemoteData.NotAsked ->
+                    ( "Fetch book", False, FetchBook )
+
+                RemoteData.Loading ->
+                    ( "Fetching book", True, NoOp )
+
+                RemoteData.Success _ ->
+                    ( "Add book", False, NoOp )
+
+                RemoteData.Failure _ ->
+                    ( "Try again", False, FetchBook )
+    in
+        form [ class "addBook", onSubmit onSubmit_ ]
+            [ label [ class "addFormField" ]
+                [ span [ class "addFormLabel addFormText" ] [ text "ISBN:" ]
+                , input
+                    [ type_ "text"
+                    , placeholder "9780963009609"
+                    , onInput SetAddFormISBN
+                    , class "addFormInput"
+                    , pattern "(\\d{10}|\\d{13})"
+                    , required True
+                    ]
+                    []
                 ]
-                []
-            , span [ class "addFormText" ] [ text "/" ]
-            , input
-                [ type_ "number"
-                , name "pageCount"
-                , placeholder "978"
-                , onInput SetAddFormPageCount
-                , class "addFormInput"
-                ]
-                []
+            , button [ type_ "submit", disabled submitIsDisabled ] [ text buttonText ]
             ]
-        , button [ type_ "submit" ] [ text "Add book" ]
-        ]
 
 
-addBookField : String -> String -> String -> String -> (String -> Msg) -> Html Msg
-addBookField label_ type__ name_ placeholder_ onInput_ =
+addBookField : String -> String -> String -> (String -> Msg) -> Html Msg
+addBookField label_ type__ placeholder_ onInput_ =
     label [ class "addFormField" ]
         [ span [ class "addFormLabel addFormText" ] [ text label_ ]
         , input
             [ type_ type__
-            , name name_
             , placeholder placeholder_
             , onInput onInput_
             , class "addFormInput"

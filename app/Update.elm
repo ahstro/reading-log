@@ -25,13 +25,8 @@ type Msg
 
 
 updateModel : Model -> ( Model, Cmd Msg )
-updateModel model =
-    -- (flip (!)) []
-    let
-        _ =
-            Debug.log "FOO" model
-    in
-        model ! []
+updateModel =
+    (flip (!)) []
 
 
 hideError : Model -> ( Model, Cmd Msg )

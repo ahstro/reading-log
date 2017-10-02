@@ -17,7 +17,21 @@ encodeModel : Model -> Encode.Value
 encodeModel model =
     Encode.object
         [ ( "books", encodeBooks model.books )
+        , ( "progress", encodeProgress model.progress )
         ]
+
+
+encodeProgress : EveryDict ISBN Page -> Encode.Value
+encodeProgress progress =
+    progress
+        |> EveryDict.toList
+        |> List.map
+            (\( ISBN isbn, Page page ) ->
+                ( toString isbn
+                , Encode.int page
+                )
+            )
+        |> Encode.object
 
 
 encodeBooks : EveryDict ISBN Book -> Encode.Value

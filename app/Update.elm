@@ -57,7 +57,17 @@ update msg model =
                 )
 
         HandleBookFetch res ->
-            updateModel { model | bookToAdd = res }
+            let
+                newModel =
+                    case res of
+                        RemoteData.Success book ->
+                            { model | isbnToAdd = "" }
+                                |> addBook book 0
+
+                        _ ->
+                            model
+            in
+                updateModel { newModel | bookToAdd = res }
 
 
 decodeBook : String -> Decode.Decoder Book

@@ -8,6 +8,7 @@ import Html.Attributes
         , src
         , type_
         , name
+        , value
         , pattern
         , disabled
         , required
@@ -41,13 +42,13 @@ addBookForm model =
         ( buttonText, submitIsDisabled, onSubmit_ ) =
             case model.bookToAdd of
                 RemoteData.NotAsked ->
-                    ( "Fetch book", False, FetchBook )
+                    ( "Add book", False, FetchBook )
 
                 RemoteData.Loading ->
-                    ( "Fetching book", True, NoOp )
+                    ( "Adding book", True, NoOp )
 
                 RemoteData.Success _ ->
-                    ( "Add book", False, NoOp )
+                    ( "Add another book", False, FetchBook )
 
                 RemoteData.Failure _ ->
                     ( "Try again", False, FetchBook )
@@ -62,6 +63,7 @@ addBookForm model =
                     , class "addFormInput"
                     , pattern "(\\d{10}|\\d{13})"
                     , required True
+                    , value model.isbnToAdd
                     ]
                     []
                 ]

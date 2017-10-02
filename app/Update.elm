@@ -1,4 +1,4 @@
-module Update
+port module Update
     exposing
         ( Msg(..)
         , update
@@ -8,13 +8,12 @@ import Model
     exposing
         ( Model
         , Book
-        , ISBN(..)
-        , Page(..)
         , addBook
         )
 import Http
 import RemoteData exposing (WebData)
-import Json.Decode as Decode
+import Json.Encode
+import Json exposing (decodeISBN, decodeBook, pageDecoder, encodeModel)
 
 
 type Msg
@@ -27,6 +26,11 @@ type Msg
 updateModel : Model -> ( Model, Cmd Msg )
 updateModel =
     (flip (!)) []
+
+
+updateModelAndSave : Model -> ( Model, Cmd Msg )
+updateModelAndSave model =
+    ( model, updateLocalStorage <| encodeModel model )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -67,32 +71,7 @@ update msg model =
                         _ ->
                             model
             in
-                updateModel { newModel | bookToAdd = res }
+                updateModelAndSave { newModel | bookToAdd = res }
 
 
-decodeBook : String -> Decode.Decoder Book
-decodeBook isbnString =
-    (Decode.field ("ISBN:" ++ isbnString)
-        (Decode.map4 Book
-            (Decode.field "title" Decode.string)
-            (Decode.field "by_statement" Decode.string)
-            (Decode.field "number_of_pages" pageDecoder)
-            (decodeISBN isbnString)
-        )
-    )
-
-
-pageDecoder : Decode.Decoder Page
-pageDecoder =
-    Decode.int
-        |> Decode.andThen (Decode.succeed << Page)
-
-
-decodeISBN : String -> Decode.Decoder ISBN
-decodeISBN isbnString =
-    case String.toInt isbnString of
-        Ok isbn ->
-            Decode.succeed (ISBN isbn)
-
-        Err err ->
-            Decode.fail err
+port updateLocalStorage : Json.Encode.Value -> Cmd msg

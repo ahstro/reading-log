@@ -11,7 +11,11 @@
     <div id="Main"><div id="Loading">Loading...</div></div>
     <script type="text/javascript" src="./build/app.js"></script>
     <script type="text/javascript">
-      var app = Elm.Main.embed(document.querySelector("#Main"))
+      const localStorageId = "reading-log"
+      const app = Elm.Main.embed(document.querySelector("#Main"))
+      app.ports.updateLocalStorage.subscribe(model => {
+        localStorage.setItem(localStorageId, JSON.stringify(model))
+      })
     </script>
   </body>
 </html>

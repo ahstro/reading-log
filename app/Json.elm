@@ -122,14 +122,15 @@ bookDecoder =
 booksDecoder : Decoder (EveryDict ISBN Book)
 booksDecoder =
     (Decode.keyValuePairs Decode.value)
-        |> Decode.andThen (decodeListToEveryDict ( isbnDecoder, bookDecoder ))
+        |> Decode.andThen
+            (decodeKeyValuePairsToEveryDict ( isbnDecoder, bookDecoder ))
 
 
-decodeListToEveryDict :
+decodeKeyValuePairsToEveryDict :
     ( Decoder a, Decoder b )
     -> List ( String, Decode.Value )
     -> Decoder (EveryDict a b)
-decodeListToEveryDict ( aDecoder, bDecoder ) =
+decodeKeyValuePairsToEveryDict ( aDecoder, bDecoder ) =
     List.filterMap (decodePairToMaybe ( aDecoder, bDecoder ))
         >> EveryDict.fromList
         >> Decode.succeed
@@ -161,7 +162,8 @@ decodePairToMaybe ( aDecoder, bDecoder ) ( aString, bValue ) =
 progressDecoder : Decoder (EveryDict ISBN Page)
 progressDecoder =
     (Decode.keyValuePairs Decode.value)
-        |> Decode.andThen (decodeListToEveryDict ( isbnDecoder, pageDecoder ))
+        |> Decode.andThen
+            (decodeKeyValuePairsToEveryDict ( isbnDecoder, pageDecoder ))
 
 
 debugAndReturn : a -> String -> b -> a

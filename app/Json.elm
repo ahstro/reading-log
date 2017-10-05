@@ -16,7 +16,7 @@ import Model
         , Page(..)
         , addBook
         )
-import Json.Decode as Decode
+import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
 import EveryDict exposing (EveryDict)
 
@@ -75,7 +75,7 @@ encodePage (Page page) =
     Encode.int page
 
 
-decodeBookFromOpenLibrary : String -> Decode.Decoder Book
+decodeBookFromOpenLibrary : String -> Decoder Book
 decodeBookFromOpenLibrary isbnString =
     (Decode.field ("ISBN:" ++ isbnString)
         (Decode.map4 Book
@@ -87,13 +87,13 @@ decodeBookFromOpenLibrary isbnString =
     )
 
 
-pageDecoder : Decode.Decoder Page
+pageDecoder : Decoder Page
 pageDecoder =
     Decode.int
         |> Decode.andThen (Decode.succeed << Page)
 
 
-decodeISBN : String -> Decode.Decoder ISBN
+decodeISBN : String -> Decoder ISBN
 decodeISBN isbnString =
     case String.toInt isbnString of
         Ok isbn ->
@@ -103,13 +103,13 @@ decodeISBN isbnString =
             Decode.fail err
 
 
-isbnDecoder : Decode.Decoder ISBN
+isbnDecoder : Decoder ISBN
 isbnDecoder =
     Decode.int
         |> Decode.andThen (\isbn -> Decode.succeed (ISBN isbn))
 
 
-bookDecoder : Decode.Decoder Book
+bookDecoder : Decoder Book
 bookDecoder =
     (Decode.map4 Book
         (Decode.field "name" Decode.string)
@@ -119,16 +119,16 @@ bookDecoder =
     )
 
 
-booksDecoder : Decode.Decoder (EveryDict ISBN Book)
+booksDecoder : Decoder (EveryDict ISBN Book)
 booksDecoder =
     (Decode.keyValuePairs Decode.value)
         |> Decode.andThen (decodeListToEveryDict ( isbnDecoder, bookDecoder ))
 
 
 decodeListToEveryDict :
-    ( Decode.Decoder a, Decode.Decoder b )
+    ( Decoder a, Decoder b )
     -> List ( String, Decode.Value )
-    -> Decode.Decoder (EveryDict a b)
+    -> Decoder (EveryDict a b)
 decodeListToEveryDict ( aDecoder, bDecoder ) =
     List.filterMap (decodePairToMaybe ( aDecoder, bDecoder ))
         >> EveryDict.fromList
@@ -136,7 +136,7 @@ decodeListToEveryDict ( aDecoder, bDecoder ) =
 
 
 decodePairToMaybe :
-    ( Decode.Decoder a, Decode.Decoder b )
+    ( Decoder a, Decoder b )
     -> ( String, Decode.Value )
     -> Maybe ( a, b )
 decodePairToMaybe ( aDecoder, bDecoder ) ( aString, bValue ) =
@@ -158,7 +158,7 @@ decodePairToMaybe ( aDecoder, bDecoder ) ( aString, bValue ) =
             debugAndReturn Nothing "Error decoding b:" bErr
 
 
-progressDecoder : Decode.Decoder (EveryDict ISBN Page)
+progressDecoder : Decoder (EveryDict ISBN Page)
 progressDecoder =
     (Decode.keyValuePairs Decode.value)
         |> Decode.andThen (decodeListToEveryDict ( isbnDecoder, pageDecoder ))

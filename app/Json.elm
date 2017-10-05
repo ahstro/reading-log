@@ -121,34 +121,40 @@ bookDecoder =
 booksDecoder : Decode.Decoder (EveryDict ISBN Book)
 booksDecoder =
     (Decode.keyValuePairs Decode.value)
-        |> Decode.andThen decodeBooksListToEveryDict
+        |> Decode.andThen (decodeListToEveryDict ( isbnDecoder, bookDecoder ))
 
 
-decodeBooksListToEveryDict : List ( String, Decode.Value ) -> Decode.Decoder (EveryDict ISBN Book)
-decodeBooksListToEveryDict =
-    List.filterMap stringValueToMaybeISBNBook
+decodeListToEveryDict :
+    ( Decode.Decoder a, Decode.Decoder b )
+    -> List ( String, Decode.Value )
+    -> Decode.Decoder (EveryDict a b)
+decodeListToEveryDict ( aDecoder, bDecoder ) =
+    List.filterMap (decodePairToMaybe ( aDecoder, bDecoder ))
         >> EveryDict.fromList
         >> Decode.succeed
 
 
-stringValueToMaybeISBNBook : ( String, Decode.Value ) -> Maybe ( ISBN, Book )
-stringValueToMaybeISBNBook ( isbnString, bookValue ) =
+decodePairToMaybe :
+    ( Decode.Decoder a, Decode.Decoder b )
+    -> ( String, Decode.Value )
+    -> Maybe ( a, b )
+decodePairToMaybe ( aDecoder, bDecoder ) ( aString, bValue ) =
     case
-        ( Decode.decodeString isbnDecoder isbnString
-        , Decode.decodeValue bookDecoder bookValue
+        ( Decode.decodeString aDecoder aString
+        , Decode.decodeValue bDecoder bValue
         )
     of
-        ( Ok isbn, Ok book ) ->
-            Just ( isbn, book )
+        ( Ok a, Ok b ) ->
+            Just ( a, b )
 
-        ( Err isbnErr, Err bookErr ) ->
-            debugAndReturn Nothing "Error decoding isbn and book:" ( isbnErr, bookErr )
+        ( Err aErr, Err bErr ) ->
+            debugAndReturn Nothing "Error decoding a and b:" ( aErr, bErr )
 
-        ( Err isbnErr, _ ) ->
-            debugAndReturn Nothing "Error decoding isbn:" isbnErr
+        ( Err aErr, _ ) ->
+            debugAndReturn Nothing "Error decoding a:" aErr
 
-        ( _, Err bookErr ) ->
-            debugAndReturn Nothing "Error decoding book:" bookErr
+        ( _, Err bErr ) ->
+            debugAndReturn Nothing "Error decoding b:" bErr
 
 
 debugAndReturn : a -> String -> b -> a

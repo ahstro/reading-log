@@ -11,7 +11,7 @@
     "uglify-js": "^3.1.0"
   },
   "scripts": {
-    "build:dev": "elm make app/Main.elm --output build/app.js ; exit 0",
+    "build:dev": "elm make app/Main.elm --warn --output build/app.js ; exit 0",
     "build:prod": "yarn build:dev && uglifyjs --mangle --compress --output build/app.js -- build/app.js",
     "watch": "chokidar 'app/**/*.elm' -c 'yarn build:dev'"
   }

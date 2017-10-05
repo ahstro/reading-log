@@ -2,6 +2,7 @@ module Json
     exposing
         ( decodeISBN
         , decodeBookFromOpenLibrary
+        , progressDecoder
         , booksDecoder
         , pageDecoder
         , encodeModel
@@ -155,6 +156,12 @@ decodePairToMaybe ( aDecoder, bDecoder ) ( aString, bValue ) =
 
         ( _, Err bErr ) ->
             debugAndReturn Nothing "Error decoding b:" bErr
+
+
+progressDecoder : Decode.Decoder (EveryDict ISBN Page)
+progressDecoder =
+    (Decode.keyValuePairs Decode.value)
+        |> Decode.andThen (decodeListToEveryDict ( isbnDecoder, pageDecoder ))
 
 
 debugAndReturn : a -> String -> b -> a

@@ -1,7 +1,7 @@
 module Init exposing (init, Flags)
 
 import Model exposing (Model)
-import Json exposing (booksDecoder)
+import Json exposing (booksDecoder, progressDecoder)
 import Json.Decode
 import RemoteData
 import EveryDict
@@ -10,6 +10,7 @@ import EveryDict
 type alias Flags =
     Maybe
         { books : Json.Decode.Value
+        , progress : Json.Decode.Value
         }
 
 
@@ -22,9 +23,16 @@ init maybeFlags =
                 |> Maybe.map (Json.Decode.decodeValue booksDecoder)
                 |> Maybe.andThen Result.toMaybe
                 |> Maybe.withDefault EveryDict.empty
+
+        progress =
+            maybeFlags
+                |> Maybe.map .progress
+                |> Maybe.map (Json.Decode.decodeValue progressDecoder)
+                |> Maybe.andThen Result.toMaybe
+                |> Maybe.withDefault EveryDict.empty
     in
         ( { books = books
-          , progress = EveryDict.empty
+          , progress = progress
           , daysToRead = EveryDict.empty
           , bookToAdd = RemoteData.NotAsked
           , isbnToAdd = ""

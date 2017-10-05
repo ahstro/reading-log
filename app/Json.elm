@@ -1,4 +1,11 @@
-module Json exposing (decodeISBN, decodeBook, pageDecoder, encodeModel)
+module Json
+    exposing
+        ( decodeISBN
+        , decodeBookFromOpenLibrary
+        , booksDecoder
+        , pageDecoder
+        , encodeModel
+        )
 
 import Model
     exposing
@@ -67,8 +74,8 @@ encodePage (Page page) =
     Encode.int page
 
 
-decodeBook : String -> Decode.Decoder Book
-decodeBook isbnString =
+decodeBookFromOpenLibrary : String -> Decode.Decoder Book
+decodeBookFromOpenLibrary isbnString =
     (Decode.field ("ISBN:" ++ isbnString)
         (Decode.map4 Book
             (Decode.field "title" Decode.string)
@@ -93,3 +100,60 @@ decodeISBN isbnString =
 
         Err err ->
             Decode.fail err
+
+
+isbnDecoder : Decode.Decoder ISBN
+isbnDecoder =
+    Decode.int
+        |> Decode.andThen (\isbn -> Decode.succeed (ISBN isbn))
+
+
+bookDecoder : Decode.Decoder Book
+bookDecoder =
+    (Decode.map4 Book
+        (Decode.field "name" Decode.string)
+        (Decode.field "by" Decode.string)
+        (Decode.field "pageCount" pageDecoder)
+        (Decode.field "isbn" isbnDecoder)
+    )
+
+
+booksDecoder =
+    (Decode.keyValuePairs Decode.value)
+        |> Decode.andThen decodeBooksListToEveryDict
+
+
+decodeBooksListToEveryDict : List ( String, Decode.Value ) -> Decode.Decoder (EveryDict ISBN Book)
+decodeBooksListToEveryDict =
+    List.filterMap stringValueToMaybeISBNBook
+        >> EveryDict.fromList
+        >> Decode.succeed
+
+
+stringValueToMaybeISBNBook : ( String, Decode.Value ) -> Maybe ( ISBN, Book )
+stringValueToMaybeISBNBook ( isbnString, bookValue ) =
+    case
+        ( Decode.decodeString isbnDecoder isbnString
+        , Decode.decodeValue bookDecoder bookValue
+        )
+    of
+        ( Ok isbn, Ok book ) ->
+            Just ( isbn, book )
+
+        ( Err isbnErr, Err bookErr ) ->
+            debugAndReturn Nothing "Error decoding isbn and book:" ( isbnErr, bookErr )
+
+        ( Err isbnErr, _ ) ->
+            debugAndReturn Nothing "Error decoding isbn:" isbnErr
+
+        ( _, Err bookErr ) ->
+            debugAndReturn Nothing "Error decoding book:" bookErr
+
+
+debugAndReturn : a -> String -> b -> a
+debugAndReturn a errString err =
+    let
+        _ =
+            Debug.log errString err
+    in
+        a

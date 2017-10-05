@@ -13,7 +13,7 @@ import Model
 import Http
 import RemoteData exposing (WebData)
 import Json.Encode
-import Json exposing (decodeISBN, decodeBook, pageDecoder, encodeModel)
+import Json exposing (decodeISBN, decodeBookFromOpenLibrary, pageDecoder, encodeModel)
 
 
 type Msg
@@ -55,7 +55,7 @@ update msg model =
                         ++ "&jscmd=data"
             in
                 ( { model | bookToAdd = RemoteData.Loading }
-                , Http.get apiPath (decodeBook model.isbnToAdd)
+                , Http.get apiPath (decodeBookFromOpenLibrary model.isbnToAdd)
                     |> RemoteData.sendRequest
                     |> Cmd.map HandleBookFetch
                 )

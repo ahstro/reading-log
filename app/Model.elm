@@ -1,7 +1,6 @@
 module Model
     exposing
         ( Model
-        , init
         , Book
         , ISBN(..)
         , Page(..)
@@ -35,36 +34,6 @@ type alias Model =
     , bookToAdd : WebData Book
     , isbnToAdd : String
     }
-
-
-init : ( Model, Cmd msg )
-init =
-    ( (addBook
-        (Book
-            "Regnet luktar inte här"
-            "Duraid Al-Khamisi"
-            (Page 205)
-            (ISBN 9789173895606)
-        )
-        26
-        { books = EveryDict.empty
-        , progress = EveryDict.empty
-        , daysToRead = EveryDict.empty
-        , bookToAdd = RemoteData.NotAsked
-        , isbnToAdd = ""
-        }
-      )
-        |> (\model ->
-                { model
-                    | daysToRead =
-                        EveryDict.insert
-                            (ISBN 9789173895606)
-                            30
-                            model.daysToRead
-                }
-           )
-    , Cmd.none
-    )
 
 
 addBook : Book -> Int -> Model -> Model

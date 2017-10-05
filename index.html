@@ -12,7 +12,8 @@
     <script type="text/javascript" src="./build/app.js"></script>
     <script type="text/javascript">
       const localStorageId = "reading-log"
-      const app = Elm.Main.embed(document.querySelector("#Main"))
+      const data = JSON.parse(localStorage.getItem(localStorageId))
+      const app = Elm.Main.embed(document.querySelector("#Main"), data)
       app.ports.updateLocalStorage.subscribe(model => {
         localStorage.setItem(localStorageId, JSON.stringify(model))
       })

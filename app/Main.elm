@@ -2,12 +2,12 @@ module Main exposing (main)
 
 import Html
 import View exposing (view)
-import Model exposing (init)
+import Init exposing (init)
 import Update exposing (update)
 
 
 main =
-    Html.program
+    Html.programWithFlags
         { init = init
         , view = view
         , update = update

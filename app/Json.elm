@@ -118,6 +118,7 @@ bookDecoder =
     )
 
 
+booksDecoder : Decode.Decoder (EveryDict ISBN Book)
 booksDecoder =
     (Decode.keyValuePairs Decode.value)
         |> Decode.andThen decodeBooksListToEveryDict

@@ -1,4 +1,4 @@
-module Init exposing (init)
+module Init exposing (init, Flags)
 
 import Model exposing (Model)
 import Json exposing (booksDecoder)

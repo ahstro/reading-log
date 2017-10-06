@@ -12,6 +12,8 @@ import Accessibility as Html
         , labelBefore
         , span
         , button
+        , aside
+        , section
         )
 import Html.Attributes
     exposing
@@ -39,13 +41,15 @@ import EveryDict
 
 view : Model -> Html Msg
 view model =
-    main_ []
-        [ div [ class "books" ]
+    main_ [ class "main" ]
+        [ aside [ class "sidebar" ]
+            [ addBookForm model
+            ]
+        , section [ class "books" ]
             (model.books
                 |> EveryDict.toList
                 |> List.map (viewBook model)
             )
-        , addBookForm model
         ]
 
 
@@ -80,7 +84,8 @@ addBookForm model =
                     ]
                 )
             , button
-                [ disabled submitIsDisabled
+                [ class "addBookButton"
+                , disabled submitIsDisabled
                 , onWithOptions
                     "click"
                     { stopPropagation = True

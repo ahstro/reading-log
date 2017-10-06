@@ -14,6 +14,7 @@ import Accessibility as Html
         , button
         , aside
         , section
+        , progress
         )
 import Html.Attributes
     exposing
@@ -30,7 +31,14 @@ import Html.Attributes
         , defaultValue
         )
 import Html.Events exposing (onInput, onWithOptions)
-import Model exposing (Model, ISBN, Book, Page(..))
+import Model
+    exposing
+        ( Model
+        , Progress
+        , ISBN
+        , Book
+        , Page(..)
+        )
 import Update exposing (Msg(..))
 import RemoteData
 import Helpers.Page as Page
@@ -48,7 +56,7 @@ view model =
         , section [ class "books" ]
             (model.books
                 |> EveryDict.toList
-                |> List.map (viewBook model)
+                |> List.map (viewBook model.progress)
             )
         ]
 
@@ -97,8 +105,8 @@ addBookForm model =
             ]
 
 
-viewBook : Model -> ( ISBN, Book ) -> Html Msg
-viewBook model ( isbn, book ) =
+viewBook : Progress -> ( ISBN, Book ) -> Html Msg
+viewBook progress ( isbn, book ) =
     div [ class "book" ]
         [ decorativeImg
             [ src <| getCover isbn
@@ -106,57 +114,30 @@ viewBook model ( isbn, book ) =
             ]
         , div [] [ text book.name ]
         , div [] [ text book.by ]
-        , progressBar book model
+        , progressBar book progress
         ]
 
 
-progressBar : Book -> Model -> Html Msg
-progressBar book model =
+progressBar : Book -> Progress -> Html Msg
+progressBar book progress_ =
     let
         current =
-            model.progress
+            progress_
                 |> EveryDict.get book.isbn
                 |> Maybe.withDefault (Page 0)
                 |> Page.get
+                |> toString
 
-        percent =
+        pageCount =
             book.pageCount
                 |> Page.get
-                |> toFloat
-                |> (/) (toFloat current)
-                |> (*) 100
-                |> ceiling
                 |> toString
-                |> (flip (++)) "%"
-
-        daysToRead =
-            model.daysToRead
-                |> EveryDict.get book.isbn
     in
-        div [ class "progressBar" ]
-            [ div
-                [ class "progress"
-                , style
-                    [ ( "width", percent )
-                    ]
-                ]
-                []
-            , div [ class "percent" ] [ text percent ]
-            , milestones daysToRead
+        progress
+            [ Html.Attributes.max pageCount
+            , value current
             ]
-
-
-milestones : Maybe Int -> Html Msg
-milestones daysToRead =
-    case daysToRead of
-        Just days ->
-            div [ class "milestones" ]
-                (List.repeat days <|
-                    div [ class "milestone" ] []
-                )
-
-        Nothing ->
-            text ""
+            [ text <| current ++ "/" ++ pageCount ]
 
 
 getCover : ISBN -> String

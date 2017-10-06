@@ -33,7 +33,6 @@ init maybeFlags =
     in
         ( { books = books
           , progress = progress
-          , daysToRead = EveryDict.empty
           , bookToAdd = RemoteData.NotAsked
           , isbnToAdd = ""
           }

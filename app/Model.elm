@@ -1,6 +1,7 @@
 module Model
     exposing
         ( Model
+        , Progress
         , Book
         , ISBN(..)
         , Page(..)
@@ -26,10 +27,17 @@ type alias Book =
     }
 
 
+type alias Books =
+    EveryDict ISBN Book
+
+
+type alias Progress =
+    EveryDict ISBN Page
+
+
 type alias Model =
-    { books : EveryDict ISBN Book
-    , progress : EveryDict ISBN Page
-    , daysToRead : EveryDict ISBN Int
+    { books : Books
+    , progress : Progress
     , bookToAdd : WebData Book
     , isbnToAdd : String
     }

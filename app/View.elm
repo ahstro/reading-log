@@ -1,6 +1,18 @@
 module View exposing (view)
 
-import Html exposing (Html, div, text, img, input, form, label, span, button)
+import Accessibility as Html
+    exposing
+        ( Html
+        , main_
+        , div
+        , text
+        , decorativeImg
+        , inputText
+        , form
+        , labelBefore
+        , span
+        , button
+        )
 import Html.Attributes
     exposing
         ( class
@@ -15,18 +27,19 @@ import Html.Attributes
         , placeholder
         , defaultValue
         )
-import Html.Events exposing (onInput, onSubmit)
+import Html.Events exposing (onInput, onWithOptions)
 import Model exposing (Model, ISBN, Book, Page(..))
 import Update exposing (Msg(..))
 import RemoteData
 import Helpers.Page as Page
 import Helpers.ISBN as ISBN
+import Json.Decode
 import EveryDict
 
 
 view : Model -> Html Msg
 view model =
-    div []
+    main_ []
         [ div [ class "books" ]
             (model.books
                 |> EveryDict.toList
@@ -39,7 +52,7 @@ view model =
 addBookForm : Model -> Html Msg
 addBookForm model =
     let
-        ( buttonText, submitIsDisabled, onSubmit_ ) =
+        ( buttonText, submitIsDisabled, onClickMsg ) =
             case model.bookToAdd of
                 RemoteData.NotAsked ->
                     ( "Add book", False, FetchBook )
@@ -53,46 +66,39 @@ addBookForm model =
                 RemoteData.Failure _ ->
                     ( "Try again", False, FetchBook )
     in
-        form [ class "addBook", onSubmit onSubmit_ ]
-            [ label [ class "addFormField" ]
-                [ span [ class "addFormLabel addFormText" ] [ text "ISBN:" ]
-                , input
-                    [ type_ "text"
-                    , placeholder "9780963009609"
+        form [ class "addBook" ]
+            [ labelBefore
+                [ class "addFormField" ]
+                (span [ class "addFormLabel addFormText" ] [ text "ISBN:" ])
+                (inputText
+                    model.isbnToAdd
+                    [ placeholder "9780963009609"
                     , onInput SetAddFormISBN
                     , class "addFormInput"
                     , pattern "(\\d{10}|\\d{13})"
                     , required True
-                    , value model.isbnToAdd
                     ]
-                    []
+                )
+            , button
+                [ disabled submitIsDisabled
+                , onWithOptions
+                    "click"
+                    { stopPropagation = True
+                    , preventDefault = True
+                    }
+                    (Json.Decode.succeed onClickMsg)
                 ]
-            , button [ type_ "submit", disabled submitIsDisabled ] [ text buttonText ]
+                [ text buttonText ]
             ]
-
-
-addBookField : String -> String -> String -> (String -> Msg) -> Html Msg
-addBookField label_ type__ placeholder_ onInput_ =
-    label [ class "addFormField" ]
-        [ span [ class "addFormLabel addFormText" ] [ text label_ ]
-        , input
-            [ type_ type__
-            , placeholder placeholder_
-            , onInput onInput_
-            , class "addFormInput"
-            ]
-            []
-        ]
 
 
 viewBook : Model -> ( ISBN, Book ) -> Html Msg
 viewBook model ( isbn, book ) =
     div [ class "book" ]
-        [ img
+        [ decorativeImg
             [ src <| getCover isbn
             , class "bookCover"
             ]
-            []
         , div [] [ text book.name ]
         , div [] [ text book.by ]
         , progressBar book model

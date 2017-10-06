@@ -4,7 +4,6 @@ module Model
         , Book
         , ISBN(..)
         , Page(..)
-        , addBook
         )
 
 import EveryDict exposing (EveryDict)
@@ -33,20 +32,4 @@ type alias Model =
     , daysToRead : EveryDict ISBN Int
     , bookToAdd : WebData Book
     , isbnToAdd : String
-    }
-
-
-addBook : Book -> Int -> Model -> Model
-addBook book progress model =
-    { model
-        | books =
-            EveryDict.insert
-                book.isbn
-                book
-                model.books
-        , progress =
-            EveryDict.insert
-                book.isbn
-                (Page progress)
-                model.progress
     }

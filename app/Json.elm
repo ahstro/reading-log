@@ -14,7 +14,6 @@ import Model
         , Book
         , ISBN(..)
         , Page(..)
-        , addBook
         )
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode

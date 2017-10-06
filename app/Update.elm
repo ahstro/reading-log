@@ -8,12 +8,13 @@ import Model
     exposing
         ( Model
         , Book
-        , addBook
+        , Page(..)
         )
 import Http
 import RemoteData exposing (WebData)
 import Json.Encode
 import Json exposing (decodeISBN, decodeBookFromOpenLibrary, pageDecoder, encodeModel)
+import EveryDict
 
 
 type Msg
@@ -72,6 +73,22 @@ update msg model =
                             model
             in
                 updateModelAndSave { newModel | bookToAdd = res }
+
+
+addBook : Book -> Int -> Model -> Model
+addBook book progress model =
+    { model
+        | books =
+            EveryDict.insert
+                book.isbn
+                book
+                model.books
+        , progress =
+            EveryDict.insert
+                book.isbn
+                (Page progress)
+                model.progress
+    }
 
 
 port updateLocalStorage : Json.Encode.Value -> Cmd msg

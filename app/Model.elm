@@ -1,43 +1,26 @@
-module Model
-    exposing
-        ( Model
-        , Progress
-        , Book
-        , ISBN(..)
-        , Page(..)
-        )
+module Model exposing (Model, encodeModel)
 
-import EveryDict exposing (EveryDict)
+import Book exposing (Book, Books, encodeBooks)
 import RemoteData exposing (WebData)
+import Json.Encode as Encode
 
 
-type ISBN
-    = ISBN Int
-
-
-type Page
-    = Page Int
-
-
-type alias Book =
-    { name : String
-    , by : String
-    , pageCount : Page
-    , isbn : ISBN
-    }
-
-
-type alias Books =
-    EveryDict ISBN Book
-
-
-type alias Progress =
-    EveryDict ISBN Page
+-- Types
 
 
 type alias Model =
     { books : Books
-    , progress : Progress
     , bookToAdd : WebData Book
     , isbnToAdd : String
     }
+
+
+
+-- Json encoders
+
+
+encodeModel : Model -> Encode.Value
+encodeModel model =
+    Encode.object
+        [ ( "books", encodeBooks model.books )
+        ]

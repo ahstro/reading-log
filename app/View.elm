@@ -31,18 +31,12 @@ import Html.Attributes
         , defaultValue
         )
 import Html.Events exposing (onInput, onWithOptions)
-import Model
-    exposing
-        ( Model
-        , Progress
-        , ISBN
-        , Book
-        , Page(..)
-        )
+import Model exposing (Model)
 import Update exposing (Msg(..))
 import RemoteData
-import Helpers.Page as Page
-import Helpers.ISBN as ISBN
+import Book exposing (Book)
+import Page exposing (Page)
+import ISBN exposing (ISBN)
 import Json.Decode
 import EveryDict
 
@@ -56,7 +50,7 @@ view model =
         , section [ class "books" ]
             (model.books
                 |> EveryDict.toList
-                |> List.map (viewBook model.progress)
+                |> List.map viewBook
             )
         ]
 
@@ -105,8 +99,8 @@ addBookForm model =
             ]
 
 
-viewBook : Progress -> ( ISBN, Book ) -> Html Msg
-viewBook progress ( isbn, book ) =
+viewBook : ( ISBN, Book ) -> Html Msg
+viewBook ( isbn, book ) =
     div [ class "book" ]
         [ decorativeImg
             [ src <| getCover isbn
@@ -114,30 +108,28 @@ viewBook progress ( isbn, book ) =
             ]
         , div [] [ text book.name ]
         , div [] [ text book.by ]
-        , progressBar book progress
+        , progressBar book.pageCount book.progress
         ]
 
 
-progressBar : Book -> Progress -> Html Msg
-progressBar book progress_ =
+progressBar : Page -> Page -> Html Msg
+progressBar pageCount progress_ =
     let
         current =
             progress_
-                |> EveryDict.get book.isbn
-                |> Maybe.withDefault (Page 0)
                 |> Page.get
                 |> toString
 
-        pageCount =
-            book.pageCount
+        pageCountString =
+            pageCount
                 |> Page.get
                 |> toString
     in
         progress
-            [ Html.Attributes.max pageCount
+            [ Html.Attributes.max pageCountString
             , value current
             ]
-            [ text <| current ++ "/" ++ pageCount ]
+            [ text <| current ++ "/" ++ pageCountString ]
 
 
 getCover : ISBN -> String
